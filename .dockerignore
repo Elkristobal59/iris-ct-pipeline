@@ -1,0 +1,9 @@
+.git
+.github
+.gitignore
+__pycache__/
+*.pyc
+mlruns/
+.venv/
+venv/
+README.md
