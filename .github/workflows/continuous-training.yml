@@ -1,9 +1,7 @@
 name: Continuous Training
 
 on:
-  # Manual trigger
   workflow_dispatch:
-  # Trigger when new data is added to the iris CSV
   push:
     paths:
       - "data/iris.csv"

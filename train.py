@@ -1,17 +1,3 @@
-"""Continuous training pipeline for the Iris dataset.
-
-- Loads data from data/iris.csv
-- Runs GridSearchCV (5-fold, scoring = weighted F1) over a RandomForest grid
-- Selects the model with the best mean CV F1
-- Logs params, metrics and the model to MLflow (artifacts stored in S3)
-
-Required environment variables:
-    MLFLOW_TRACKING_URI
-    AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY
-    AWS_DEFAULT_REGION
-"""
-
 import os
 import sys
 
@@ -46,7 +32,7 @@ def load_data(path: str):
     return X, y
 
 
-def main() -> int:
+def main():
     tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
     if not tracking_uri:
         print("ERROR: MLFLOW_TRACKING_URI is not set.", file=sys.stderr)
@@ -66,7 +52,7 @@ def main() -> int:
         scoring="f1_weighted",
         cv=5,
         n_jobs=-1,
-        refit=True,  # refit best estimator (highest mean CV f1) on full training set
+        refit=True,
     )
 
     with mlflow.start_run() as run:
@@ -78,13 +64,11 @@ def main() -> int:
         print(f"Best params: {grid.best_params_}")
         print(f"Best mean CV f1_weighted: {grid.best_score_:.4f}")
 
-        # Held-out test evaluation
         y_pred = best_model.predict(X_test)
         test_f1 = f1_score(y_test, y_pred, average="weighted")
         test_acc = accuracy_score(y_test, y_pred)
         print(classification_report(y_test, y_pred))
 
-        # Log to MLflow
         mlflow.log_params(grid.best_params_)
         mlflow.log_param("cv_folds", 5)
         mlflow.log_param("scoring", "f1_weighted")
@@ -93,10 +77,8 @@ def main() -> int:
         mlflow.log_metric("test_f1_weighted", test_f1)
         mlflow.log_metric("test_accuracy", test_acc)
 
-        # Dataset snapshot as an artifact (traceability of the data that triggered the run)
         mlflow.log_artifact(DATA_PATH, artifact_path="data")
 
-        # Model -> artifact store (S3) + register in the model registry
         mlflow.sklearn.log_model(
             sk_model=best_model,
             artifact_path="model",
@@ -106,8 +88,4 @@ def main() -> int:
 
         print(f"Model logged and registered as '{MODEL_NAME}'.")
 
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
+main()
