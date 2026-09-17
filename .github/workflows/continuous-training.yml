@@ -10,9 +10,34 @@ env:
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/iris-trainer
 
 jobs:
+  healthcheck:
+    name: Verify MLflow & AWS connectivity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run healthcheck
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+        run: python healthcheck.py
+
   build-and-push:
     name: Build & push Docker image
     runs-on: ubuntu-latest
+    needs: healthcheck
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
