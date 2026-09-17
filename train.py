@@ -13,7 +13,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import GridSearchCV, train_test_split
 
 DATA_PATH = os.getenv("DATA_PATH", "data/iris.csv")
-EXPERIMENT_NAME = os.getenv("MLFLOW_EXPERIMENT_NAME", "iris-continuous-training")
+EXPERIMENT_NAME = os.getenv("MLFLOW_EXPERIMENT_NAME", "iris-continuous-training-gcp")
 MODEL_NAME = os.getenv("MLFLOW_MODEL_NAME", "iris-classifier")
 RANDOM_STATE = 42
 
