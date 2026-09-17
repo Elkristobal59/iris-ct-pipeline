@@ -34,10 +34,7 @@ def load_data(path: str):
 
 def main() -> int:
     tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
-    if not tracking_uri:
-        print("ERROR: MLFLOW_TRACKING_URI is not set.", file=sys.stderr)
-        return 1
-    
+
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(EXPERIMENT_NAME)
 
